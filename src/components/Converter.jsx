@@ -1,25 +1,103 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MdCached } from "react-icons/md";
 import { Select, MenuItem, FormControl } from "@material-ui/core";
+import useDebounce from "../hooks/useDebounce";
 
 function Converter() {
+  let currencySelect = useRef();
+  const [amount, setAmount] = useState();
+  const [conversionRate, setConversionRate] = useState(0);
+  const [newAmount, setNewAmount] = useState(0);
+  const [currencyToConvertFrom, setCurrencyToConvertFrom] = useState("SEK");
+  const [currencyToConvertTo, setCurrencyToConvertTo] = useState("");
+  const [currenciesList, setCurrenciesList] = useState([]);
+  const [switchClicked, setSwitchClicked] = useState(false);
+
+  useDebounce(
+    () => {
+      console.log(amount, conversionRate, currencyToConvertTo);
+      setNewAmount(Math.round(amount * conversionRate * 100) / 100);
+    },
+    500,
+    [amount, currencyToConvertFrom, currencyToConvertTo]
+  );
+
+  async function fetchExchangeRate() {
+    if (!switchClicked) {
+      const response = await fetch(
+        `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
+      );
+      const data = await response.json();
+
+      setCurrenciesList(data.conversion_rates);
+    } else if (switchClicked) {
+      const response = await fetch(
+        `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
+      );
+      const data = await response.json();
+
+      setCurrenciesList(data.conversion_rates);
+      setConversionRate(data.conversion_rates[currencyToConvertTo]);
+    }
+  }
+
+  useEffect(() => {
+    fetchExchangeRate();
+  }, [currencyToConvertFrom]);
+
+  function handleInputChange(e) {
+    setAmount(Number(e.target.value));
+  }
+
+  function handleSwitch() {
+    console.log("switch");
+    setSwitchClicked(true);
+    setAmount(newAmount);
+    setCurrencyToConvertFrom(currencyToConvertTo);
+    setCurrencyToConvertTo(currencyToConvertFrom);
+    setCurrenciesList([]);
+
+    fetchExchangeRate();
+  }
+
   return (
     <div className="container">
       <FormControl variant="outlined" size="medium">
-        <Select id="select" value="USD">
-          <MenuItem value="USD">USD</MenuItem>
-          <MenuItem value="SEK">SEK</MenuItem>
+        <Select
+          id="select"
+          value={currencyToConvertFrom}
+          onChange={(e) => {
+            setCurrencyToConvertFrom(e.target.value);
+          }}
+        >
+          {Object.keys(currenciesList).map((key) => (
+            <MenuItem value={key}>{key}</MenuItem>
+          ))}
         </Select>
       </FormControl>
-      <input type="text" placeholder="USD" />
-      <button>
+      <input
+        type="number"
+        placeholder={currencyToConvertFrom}
+        onChange={handleInputChange}
+        value={amount === 0 ? "" : amount}
+      />
+      <button onClick={handleSwitch}>
         <MdCached />
       </button>
-      <input type="text" placeholder="SEK" />
+      <input type="text" value={Math.round(newAmount * 100) / 100} />
       <FormControl variant="outlined" size="medium">
-        <Select id="select" value="USD">
-          <MenuItem value="USD">USD</MenuItem>
-          <MenuItem value="SEK">SEK</MenuItem>
+        <Select
+          id="select"
+          value={currencyToConvertTo}
+          onChange={(e) => {
+            setCurrencyToConvertTo(e.target.value);
+            setConversionRate(currenciesList[e.target.value]);
+          }}
+          ref={currencySelect}
+        >
+          {Object.keys(currenciesList).map((key) => (
+            <MenuItem value={key}>{key}</MenuItem>
+          ))}
         </Select>
       </FormControl>
     </div>
