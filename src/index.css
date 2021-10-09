@@ -21,7 +21,7 @@ main {
   align-items: center;
 }
 
-header {
+.contentContainer {
   position: absolute;
   top: 20%;
   display: flex;
@@ -44,16 +44,14 @@ button {
   background-color: transparent;
   border: none;
   color: #ff1d89;
-  transition: transform 0.5s ease-in-out;
 }
 
 button:hover {
   cursor: pointer;
 }
 
-button:focus {
+button:active {
   color: hsl(331, 100%, 70%);
-  transform: rotate(-180deg);
 }
 
 input {

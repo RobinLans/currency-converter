@@ -4,7 +4,7 @@ function App() {
   return (
     <div className="App">
       <main>
-        <header>
+        <header className="contentContainer">
           <h1>The</h1>
           <h1 className="pink">Currency</h1>
           <h1>Converter</h1>

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { MdCached } from "react-icons/md";
 import { Select, MenuItem, FormControl } from "@material-ui/core";
 import useDebounce from "../hooks/useDebounce";
 
 function Converter() {
-  let currencySelect = useRef();
-  const [amount, setAmount] = useState();
+  const [amount, setAmount] = useState(0);
   const [conversionRate, setConversionRate] = useState(0);
   const [newAmount, setNewAmount] = useState(0);
   const [currencyToConvertFrom, setCurrencyToConvertFrom] = useState("SEK");
@@ -15,7 +14,6 @@ function Converter() {
 
   useDebounce(
     () => {
-      console.log(amount, conversionRate, currencyToConvertTo);
       setNewAmount(Math.round(amount * conversionRate * 100) / 100);
     },
     500,
@@ -23,22 +21,32 @@ function Converter() {
   );
 
   async function fetchExchangeRate() {
-    if (!switchClicked) {
-      const response = await fetch(
-        `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
-      );
-      const data = await response.json();
+    // if (!switchClicked) {
+    //   const response = await fetch(
+    //     `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
+    //   );
+    //   const data = await response.json();
 
-      setCurrenciesList(data.conversion_rates);
-    } else if (switchClicked) {
-      const response = await fetch(
-        `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
-      );
-      const data = await response.json();
+    //   setCurrenciesList(data.conversion_rates);
+    // } else if (switchClicked) {
+    //   const response = await fetch(
+    //     `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
+    //   );
+    //   const data = await response.json();
 
-      setCurrenciesList(data.conversion_rates);
+    //   setCurrenciesList(data.conversion_rates);
+    //   setConversionRate(data.conversion_rates[currencyToConvertTo]);
+    // }
+
+    const response = await fetch(
+      `https://v6.exchangerate-api.com/v6/6d5af6167114a86e899922df/latest/${currencyToConvertFrom}`
+    );
+    const data = await response.json();
+
+    if (switchClicked)
       setConversionRate(data.conversion_rates[currencyToConvertTo]);
-    }
+
+    setCurrenciesList(data.conversion_rates);
   }
 
   useEffect(() => {
@@ -50,7 +58,6 @@ function Converter() {
   }
 
   function handleSwitch() {
-    console.log("switch");
     setSwitchClicked(true);
     setAmount(newAmount);
     setCurrencyToConvertFrom(currencyToConvertTo);
@@ -70,8 +77,10 @@ function Converter() {
             setCurrencyToConvertFrom(e.target.value);
           }}
         >
-          {Object.keys(currenciesList).map((key) => (
-            <MenuItem value={key}>{key}</MenuItem>
+          {Object.keys(currenciesList).map((key, id) => (
+            <MenuItem value={key} key={id}>
+              {key}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -79,12 +88,12 @@ function Converter() {
         type="number"
         placeholder={currencyToConvertFrom}
         onChange={handleInputChange}
-        value={amount === 0 ? "" : amount}
+        value={!amount ? "" : amount}
       />
       <button onClick={handleSwitch}>
         <MdCached />
       </button>
-      <input type="text" value={Math.round(newAmount * 100) / 100} />
+      <input type="text" value={newAmount.toFixed(2)} disabled="disabled" />
       <FormControl variant="outlined" size="medium">
         <Select
           id="select"
@@ -93,10 +102,11 @@ function Converter() {
             setCurrencyToConvertTo(e.target.value);
             setConversionRate(currenciesList[e.target.value]);
           }}
-          ref={currencySelect}
         >
-          {Object.keys(currenciesList).map((key) => (
-            <MenuItem value={key}>{key}</MenuItem>
+          {Object.keys(currenciesList).map((key, id) => (
+            <MenuItem value={key} key={id}>
+              {key}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
