@@ -8,7 +8,7 @@ A small project that I made as a little challenge that was started by a discord 
 Clone the project
 `git clone https://github.com/RobinLans/currency-converter.git`
 
-Cnstall the dependencies
+Install the dependencies
 `npm install`
 
 Start the dev environment
