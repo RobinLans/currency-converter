@@ -2,7 +2,7 @@
 
 A small project that I made as a little challenge that was started by a discord community React Learn Group. A currency converter makes it easy for you to convert and check what other currencies stand in reference to other currencies
 
-[live-demo](#)
+[live-demo](https://pedantic-wilson-dbd0ff.netlify.app/)
 ## Installation
 
 Clone the project
